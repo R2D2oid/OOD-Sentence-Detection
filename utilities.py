@@ -22,20 +22,15 @@ def dump_picklefile(object_, path_):
 
 def load_textfile(path_):
 	with open(path_, 'r') as f:
-		return f.readlines()
+		lines = f.readlines()
+	return [l.strip() for l in lines]
+
 
 def dump_textfile(data, path_):
 	with open(path_, 'w') as f:
 		for item in data:
 			f.write(item+'\n')
 	return True
-
-def load_terms(path_):
-	terms_dct = load_picklefile(path_)
-	terms = []
-	[terms.extend(lst) for lst in terms_dct.values()] 
-	terms = [t.lower() for t in terms]
-	return terms
 
 def sentence_contains_term(sentence, terms):
 	for t in terms:

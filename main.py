@@ -11,7 +11,7 @@ if __name__ == '__main__':
 	parser.add_argument('--subtitle_dir', dest = 'subtitle_dir', default = 'data/subtitles_with_timestamp', help = 'subtitles dir')
 	parser.add_argument('--sentence_dir', dest = 'sentence_dir', default = 'data/sentences', help = 'sentences dir')
 	parser.add_argument('--artifact_dir', dest = 'artifact_dir', default = 'data/artifacts', help = 'artifacts dir')
-	parser.add_argument('--terms_path', dest = 'terms_path', default = '/home/pishu/Desktop/repos/datasets/HockeyTerms/hockey_terms_dict.pkl', help = 'terms path')
+	parser.add_argument('--terms_path', dest = 'terms_path', default = 'data/hockey_terms.txt', help = 'terms path')
 	parser.add_argument('--freqdist_path', dest = 'freqdist_path', default = 'data/artifacts/NHL.corpus.freqdist.pkl', help = 'corpus freqdist path')
 	parser.add_argument('--model_name', dest = 'model_name', default = 'universal-sentence-encoder', help = 'model for extracting corpus embeddings: universal-sentence-encoder or fasttext ')
 	parser.add_argument('--extract_sentences', dest = 'extract_sentences', default = False, help = 'boolean value indicating whether to extract sentences from subtitles or load existing sentences')
@@ -60,7 +60,7 @@ if __name__ == '__main__':
 	embeddings = tsne_dim_reduction(embeddings)
 
 	## load hockey terms 
-	terms = utils.load_terms(terms_path)
+	terms = utils.load_textfile(terms_path)
 
 	## create sentence label classes based on presence of hockey terms
 	classes = [utils.sentence_contains_term(s,terms) for s in sentences]
