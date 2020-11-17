@@ -1,0 +1,4 @@
+sister
+matplotlib
+tensorflow-gpu
+tensorflow_hub
