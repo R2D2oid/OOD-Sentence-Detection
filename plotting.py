@@ -46,4 +46,8 @@ def plot_tsne(embeddings, sentences, classes):
 					fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect('motion_notify_event', hover)
+
+	fig1 = plt.gcf()
+	plt.draw()
 	plt.show()
+	return fig1

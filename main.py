@@ -81,4 +81,5 @@ if __name__ == '__main__':
 		classes = [0 for s in sentences]
 
 	## plot T-SNE embeddings
-	plot_tsne(embeddings, sentences, classes)
+	plot = plot_tsne(embeddings, sentences, classes)
+	plot.savefig('{}/fig.png'.format(artifact_dir), dpi=100)
