@@ -7,8 +7,10 @@ virtualenv --system-site-packages -p python3 env_OOD
 source env_OOD/bin/activate
 pip install -r requirements.txt
 ```
-### Extract sentences from subtitles and visualize embeddings of the corpus
+### Command to run
 ```
-python3 main.py --extract_sentences True
+python3 main.py --configpath config.cfg
 ```
 
+### Experiment Configurations
+All configs are loaded from `config.cfg` 
