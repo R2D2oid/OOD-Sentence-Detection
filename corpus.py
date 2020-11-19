@@ -37,7 +37,7 @@ class Corpus:
 				least_freq_words.append(w)
 		return least_freq_words
 
-	def get_sentence_encodings(self, model_name = 'universal-sentence-encoder', output_dir = None):
+	def get_sentence_encodings(self, model_name = 'universal-sentence-encoder', output_dir = None, low_memory_mode = False):
 		if model_name == 'universal-sentence-encoder':
 			import tensorflow as tf
 			import tensorflow_hub as hub
@@ -54,13 +54,8 @@ class Corpus:
 				sentence_encoding_batch = [(' '.join(s), model([' '.join(s)])) for s in self.sents[i:i+self.batch_size]]
 				utils.dump_picklefile(sentence_encoding_batch, path_)
 			
-			## load embeddings into memory
-			if self.sents_count > 100*self.batch_size:
-				print('The embeddings are too large to be loaded into memory')
-				print('A smaller subset is loaded and returned')
-				return sentence_encoding_batch
-			else:
-				return utils.load_precomputed_embeddings(output_dir)
+			## load calculated embeddings into memory
+			return utils.load_precomputed_embeddings(output_dir, low_memory_mode=low_memory_mode)
 
 	@staticmethod
 	def get_corpus_from_textfiles(textfiles_dir):

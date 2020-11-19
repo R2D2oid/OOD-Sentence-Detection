@@ -13,18 +13,20 @@ if __name__ == '__main__':
 	args = parser.parse_args()
 
 	config = configloader(args.configpath)
-	dataset_name, subtitle_dir, sentence_dir, artifact_dir, terms_path, model_name, extract_sentences, clean_sentences, clean_sentence_dir, embedding_dir, emoticons_path, precomputed_embeddings, pregrenerated_corpus, use_clean_sentences, pca_dims = get_variables(config['var'])
+	dataset_name, subtitle_dir, sentence_dir, artifact_dir, terms_path, model_name, extract_sentences, clean_sentences, clean_sentence_dir, embedding_dir, emoticons_path, precomputed_embeddings, pregrenerated_corpus, use_clean_sentences, low_memory_mode, pca_dims = get_variables(config['var'])
+	
+	experiment_name = args.configpath.split('.')[1:-1]
 
-	utils.create_dir_if_not_exist(sentence_dir)
-	utils.create_dir_if_not_exist(embedding_dir)
 	utils.create_dir_if_not_exist(artifact_dir)
 
 	## extract sentences from NHL subtitles
 	if extract_sentences and dataset_name == 'NHL_Corpus': 
+		utils.create_dir_if_not_exist(sentence_dir)
 		convert_subtitles_to_sentences(subtitle_dir, sentence_dir)
 
 	## extract sentences from MPC chat records
-	if extract_sentences and dataset_name == 'MPC_Corpus': 
+	if extract_sentences and dataset_name == 'MPC_Corpus':
+		utils.create_dir_if_not_exist(sentence_dir) 
 		convert_MPC_corpus_to_sentences(subtitle_dir, sentence_dir, emoticons_path)
 
 	## clean up sentences by removing the lease frequent words 
@@ -49,13 +51,15 @@ if __name__ == '__main__':
 		corpus = utils.load_picklefile('{}/corpus.pkl'.format(artifact_dir))
 	else:	
 		## load sentences into corpus
+		print('loading corpus from {}'.format(sentence_dir))
 		corpus = Corpus(sentence_dir)
 		utils.dump_picklefile(corpus, '{}/corpus.pkl'.format(artifact_dir))
 
 	## encode sentences 
 	if precomputed_embeddings:
-		sentence_encodings = utils.load_precomputed_embeddings(embedding_dir)
+		sentence_encodings = utils.load_precomputed_embeddings(embedding_dir, low_memory_mode=low_memory_mode)
 	else:
+		utils.create_dir_if_not_exist(embedding_dir)
 		if model_name == 'universal-sentence-encoder':
 			sentence_encodings = corpus.get_sentence_encodings(model_name = 'universal-sentence-encoder', output_dir = embedding_dir)
 		elif model_name == 'fasttext':
@@ -82,4 +86,4 @@ if __name__ == '__main__':
 
 	## plot T-SNE embeddings
 	plot = plot_tsne(embeddings, sentences, classes)
-	plot.savefig('{}/fig.png'.format(artifact_dir), dpi=100)
+	plot.savefig('{}/{}.png'.format(artifact_dir, experiment_name), dpi=100)

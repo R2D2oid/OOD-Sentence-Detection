@@ -22,6 +22,7 @@ def configloader (configpath):
 	section['precomputed_embeddings'] = cp.getboolean(tag, 'precomputed_embeddings')
 	section['pregrenerated_corpus'] = cp.getboolean(tag, 'pregrenerated_corpus')
 	section['use_clean_sentences'] = cp.getboolean(tag, 'use_clean_sentences')
+	section['low_memory_mode'] = cp.getboolean(tag, 'low_memory_mode')
 	section['pca_dims'] = cp.getint(tag, 'pca_dims')
 	
 	config[tag] = section
@@ -56,6 +57,7 @@ def get_variables(var):
 	precomputed_embeddings = var['precomputed_embeddings']
 	pregrenerated_corpus = var['pregrenerated_corpus']
 	use_clean_sentences = var['use_clean_sentences']
+	low_memory_mode = var['low_memory_mode']
 
 	pca_dims = var['pca_dims']
 
@@ -73,4 +75,5 @@ def get_variables(var):
 			 precomputed_embeddings, \
 			 pregrenerated_corpus, \
 			 use_clean_sentences, \
+			 low_memory_mode, \
 			 pca_dims

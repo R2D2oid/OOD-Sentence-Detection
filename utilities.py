@@ -32,13 +32,18 @@ def dump_textfile(data, path_):
 				f.write(item+'\n')
 	return True
 
-def load_precomputed_embeddings(dir_):
+def load_precomputed_embeddings(dir_, low_memory_mode = False):
 	filepaths = get_filepaths(dir_)
 	precomputed_embeddings = []
 	for path_ in filepaths:
 		print('loading {}'.format(path_))
 		sentence_embeddings = load_picklefile(path_)
 		precomputed_embeddings.extend(sentence_embeddings)
+
+		if low_memory_mode and len(precomputed_embeddings) > 100000:
+			print('low memory mode is active.')
+			print('a smaller subset of the embeddings are returned inconsideration for memory usage')
+			return precomputed_embeddings
 	return precomputed_embeddings
 
 def sentence_contains_term(sentence, terms):
