@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from matplotlib.colors import ListedColormap
 
-def plot_tsne(embeddings, sentences, classes):
+def plot_tsne(embeddings, sentences, classes, legend_info = None):
 	'''
 	Input:
 	embeddings: np.array of shape num_sentences x 2
@@ -15,8 +17,17 @@ def plot_tsne(embeddings, sentences, classes):
 	names = sentences
 
 	fig, ax = plt.subplots()
-	sc = plt.scatter(x, y, c = classes, alpha = 0.5) 
-	# ax.set_axis_off()
+
+	if legend_info is None:
+		sc = plt.scatter(x, y, c = classes, alpha = 0.5) 
+	else:
+		class_mpatches = [mpatches.Patch(color=color, label=name) for name,color in legend_info]
+		colormap = ListedColormap([c for _,c in legend_info])
+		plt.legend(handles = class_mpatches)
+
+		sc = plt.scatter(x, y, c = classes, cmap = colormap, alpha = 0.5)
+
+
 	annot = ax.annotate('', xy = (0,0), 
 						xytext = (-10,10), 
 						textcoords = 'offset points',
