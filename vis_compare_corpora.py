@@ -1,21 +1,30 @@
 import numpy as np
+import argparse
 import utilities as utils
 from dim_reduction import pca_dim_reduction, tsne_dim_reduction
 from plotting import plot_tsne
  
 if __name__ == '__main__':
 
-	## dataset embeddings
-	embeddings_corpus1 = '/path/to/embeddings_corpus1'
-	embeddings_corpus2 = '/path/to/embeddings_corpus2'
+	parser = argparse.ArgumentParser ()
+	parser.add_argument('--corpora_dirs', dest = 'corpora_dirs', default = '/path/to/corpus_embeddings1,/path/to/corpus_embeddings2', help = 'provide a list of corpus embeddings directories separated by comma')
+	parser.add_argument('--corpora_names', dest = 'corpora_names', default = 'corpus1,corpus2', help = 'provide a list of corpus names separated by comma')
+	parser.add_argument('--colors', dest = 'colors', default='purple,gold,cyan,black', help = 'provide a list of colors separated by comma')
+	parser.add_argument('--cap_size', dest = 'cap_size', default = 1000, help = 'provide a list of corpus embeddings directories')
 
-	embedding_sources = []
-	embedding_sources.append(embeddings_corpus1)
-	embedding_sources.append(embeddings_corpus2)
+	args = parser.parse_args()
+
+	## dataset embedding dirs
+	corpora_dirs = args.corpora_dirs.split(',')
+	corpora_names = args.corpora_names.split(',')
+	colors = args.colors.split(',')
 
 	## limit the number of data points from each corpus
-	cap_size = 20000
-	
+	cap_size = int(args.cap_size)
+
+	embedding_sources = []
+	[embedding_sources.append(c) for c in corpora_dirs]
+
 	sentences = []
 	embeddings = []
 	lengths = []
@@ -43,7 +52,8 @@ if __name__ == '__main__':
 			classes[j] = i+1
 
 	## plot t-SNE embeddings
-	legend_info = [('Corpus 1','purple'), ('Corpus 2','gold')]
-	plot = plot_tsne(embeddings, sentences, classes, legend_info)
+	legend_info = []
+	[legend_info.append((corpora_names[i],colors[i])) for i in range(len(corpora_names))]
 
+	plot = plot_tsne(embeddings, sentences, classes, legend_info)
 	plot.savefig('corpora_comparison.png', dpi=100)
