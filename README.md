@@ -11,9 +11,7 @@ pip install -r requirements.txt
 ```
 python3 main.py --configpath config.cfg
 ```
-
-### Experiment Configurations
-All configs are loaded from `config.cfg` 
+experiment configurations are loaded from [`config.cfg`](config.cfg)
 
 ### visualizing corpora
 ```
