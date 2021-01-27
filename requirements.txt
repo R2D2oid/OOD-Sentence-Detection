@@ -2,3 +2,5 @@ sister
 matplotlib
 tensorflow-gpu
 tensorflow_hub
+LocalitySensitiveHashing
+BitVector
