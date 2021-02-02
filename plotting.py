@@ -62,3 +62,37 @@ def plot_tsne(embeddings, sentences, classes, legend_info = None):
 	plt.draw()
 	plt.show()
 	return fig1
+
+def plot_precision_recall_f1_curve(precisions, recalls, thresholds, f1_scores):
+	'''
+	Given arrays of precisions, recalls, thresholds, f1_scores for each confidence threshold 
+	Plots precision-recall curve with and f1 score overlay 
+	'''
+	plt.scatter(recalls, precisions, c = thresholds)
+	plt.plot(recalls, precisions, label = 'precision-recall')
+	plt.plot(recalls, f1_scores, c = 'r', label = 'f1 score')
+
+	plt.xlabel('recall')
+	plt.ylabel('precision')
+	plt.ylim(0.0, 1.0)	
+	plt.xlim(0.2, 1.0)
+	plt.legend()
+	fig1 = plt.gcf()
+	plt.show()
+	return fig1
+
+
+def plot_precision_by_conf(bins_, precision_by_bin):
+	'''
+	Given precisions array for each confidence bin
+	Plots precision by confidence bin
+	'''
+	plt.plot(bins_, precision_by_bin)
+	plt.scatter(bins_, precision_by_bin)
+	plt.ylim(0.0, 1.0)	
+	plt.xlabel('Confidence Bins')
+	plt.ylabel('Precision')
+	plt.title('Confidence Score Calibration')
+	fig1 = plt.gcf()
+	plt.show()
+	return fig1

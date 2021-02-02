@@ -3,7 +3,7 @@ import utilities as utils
 import numpy as np
 import pandas as pd  
 import matplotlib.pyplot as plt
-
+from plotting import plot_precision_by_conf, plot_precision_recall_f1_curve
 
 def get_precision_by_conf(annot):
 	'''
@@ -11,15 +11,6 @@ def get_precision_by_conf(annot):
 	'''
 	precision = annot.groupby('conf_').mean()
 	return precision.index, precision['gt_']
-
-def plot_precision_by_conf(bins_, precision_by_bin):
-	plt.plot(bins_, precision_by_bin)
-	plt.scatter(bins_, precision_by_bin)
-	plt.ylim(0.0, 1.0)	
-	plt.xlabel('Confidence Bins')
-	plt.ylabel('Precision')
-	plt.title('Confidence Score Calibration')
-	plt.show()
 
 def get_pred_state(pred_, gt_):
 	if pred_ == gt_:
@@ -52,25 +43,14 @@ def get_precision_recall_by_threshold(annot):
 	
 	return precisions, recalls, thresholds
 
-def plot_precision_recall_f1_curve(precisions, recalls, thresholds, f1_scores):
-	plt.scatter(recalls, precisions, c = thresholds)
-	plt.plot(recalls, precisions, label = 'precision-recall')
-	plt.plot(recalls, f1_scores, c = 'r', label = 'f1 score')
-
-	plt.xlabel('recall')
-	plt.ylabel('precision')
-	plt.ylim(0.0, 1.0)	
-	plt.xlim(0.2, 1.0)
-	plt.legend()
-	plt.show()
-
 def get_f1_scores(precisions, recalls):
 	return [round(2*(p*r)/(p+r),2) for (p,r) in zip(precisions, recalls)]
 	
-# cross-check sample id with sentence
-# python3 eval.py --samples_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/selected_NHL_samples.pkl 
-# 				  --id_to_sent_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/sentences_with_sent_id.csv
-#				  --output_dir data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100
+# cross-check sample id with sentence to create base annot file to be manually labeled
+# python3 eval.py 	--samples_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/selected_NHL_samples.pkl 
+# 					--id_to_sent_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/id_to_sent.csv 
+# 					--annotation_csv_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/annot.csv
+# 					--generate_base_annotation True
 
 # evaluate annotated file
 # python3 eval.py 	--annotation_csv_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/annotation_samples.csv
@@ -82,6 +62,7 @@ if __name__ == '__main__':
 	parser.add_argument('--output_dir', dest = 'output_dir', default = '/path/to/', help = 'provide a dir')
 	parser.add_argument('--id_to_sent_path', dest = 'id_to_sent_path', default = '/path/to/id_to_sent.txt', help = 'provide a path')
 	parser.add_argument('--annotation_csv_path', dest = 'annotation_csv_path', default = '/path/to/id_to_sent.txt', help = 'provide a path')
+	parser.add_argument('--generate_base_annotation', dest = 'generate_base_annotation', type=bool, default = False, help = 'are you generating the base annotation file and plan on manually annotating samples next?')
 
 	args = parser.parse_args()
 
@@ -89,7 +70,32 @@ if __name__ == '__main__':
 	samples_path = args.samples_path
 	id_to_sent_path = args.id_to_sent_path
 	annotation_csv_path = args.annotation_csv_path
+	generate_base_annot = args.generate_base_annotation
 
+	# python3 eval.py 	--samples_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/selected_NHL_samples.pkl 
+	# 					--id_to_sent_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/id_to_sent.csv 
+	# 					--annotation_csv_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/annot.csv
+	# 					--generate_base_annotation True
+	if generate_base_annot: 
+	# generate base annotation file
+	# manual step: add ground truth labels as gt_
+	# afterwards add add th1, ..., th9 as the pred_ for each confidence threshold
+		samples = utils.load_picklefile(samples_path)
+		id_to_sent = utils.load_csvfile(id_to_sent_path)
+		sent_by_id = utils.csv_to_dict(id_to_sent)
+		header = ['conf_', 'id_', 'sent_'] # gt_ has to be manually assigned 
+		output = []
+		for th_,v in samples.items():
+			for id_ in v:
+				row = [round(th_,2), id_, sent_by_id[id_][0]]
+				output.append(row)
+		df = pd.DataFrame(output, columns=header)
+		df.to_csv(annotation_csv_path, index=False)
+		exit()
+
+	# if annotation file with ground truth and pred_ for each confidence level is available, use command below
+	# python3 eval.py 	--annotation_csv_path data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100/annotated_samples.csv
+	# 					--output_dir data/05_clustering/experiment_sents_2000\(NHL\)_2000\(MPC\)_reduceddim_50_numclusters_100
 	# evaluate annotated csv
 	annotations = utils.load_csvfile(annotation_csv_path)
 
@@ -98,13 +104,15 @@ if __name__ == '__main__':
 
 	# plot precision for each confidence bin
 	bin_, precision_ = get_precision_by_conf(df)
-	# plot_precision_by_conf(bin_,precision_)
+	plot = plot_precision_by_conf(bin_,precision_)
+	plot.savefig('{}/precision_by_conf.png'.format(output_dir))
 
 	# # plot precision recall curve 
 	precision_, recall_, threshold_ = get_precision_recall_by_threshold(df)
 	f1_ = get_f1_scores(precision_, recall_)
-	plot_precision_recall_f1_curve(precision_, recall_, threshold_, f1_)
-	
+	plot = plot_precision_recall_f1_curve(precision_, recall_, threshold_, f1_)
+	plot.savefig('{}/precision_recall.png'.format(output_dir))
+
 	# print precision-recall
 	for (p,r,f,t) in zip(precision_, recall_, f1_, threshold_):
 		print('0.{}: ({} , {}), f1: {}'.format(t, round(p,2),round(r,2), f))
